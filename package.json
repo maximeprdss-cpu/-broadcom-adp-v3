@@ -1,8 +1,0 @@
-{
-  "name": "broadcom-adp",
-  "version": "1.0.0",
-  "description": "Broadcom EEA SMB — Configurateur ADP Arrow Electronics",
-  "dependencies": {
-    "docx": "^8.5.0"
-  }
-}
