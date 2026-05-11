@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broadcom ADP — Arrow Electronics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #CC0000;
+  --red-dark: #990000;
+  --red-bg: #fff0f0;
+  --red-border: #ffcccc;
+  --dark: #0f1117;
+  --dark2: #1a1d27;
+  --dark3: #23263a;
+  --border: #2e3248;
+  --text: #e8eaf0;
+  --muted: #7b82a0;
+  --dim: #3a3f5c;
+  --green: #00c896;
+  --green-bg: rgba(0,200,150,0.08);
+  --green-border: rgba(0,200,150,0.25);
+  --orange: #ff8c42;
+  --orange-bg: rgba(255,140,66,0.08);
+  --orange-border: rgba(255,140,66,0.3);
+  --blue: #4a9eff;
+  --card: #13162080;
+  --input: #0d0f1a;
+  --r: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; }
+
+/* TOPBAR */
+.topbar { background: var(--dark2); border-bottom: 1px solid var(--border); padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.tl { display: flex; align-items: center; gap: 12px; }
+.logo-arrow { height: 18px; width: auto; object-fit: contain; }
+.logo-sep { width: 1px; height: 20px; background: var(--border); }
+.logo-broadcom { height: 14px; width: auto; object-fit: contain; filter: brightness(0) invert(1); opacity: 0.85; }
+.tl-text { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0.03em; }
+.tbadge { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); background: var(--dark3); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.btn-reset { font-size: 11px; font-family: 'DM Sans', sans-serif; color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: all 0.15s; }
+.btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+/* LAYOUT WITH SIDEBAR */
+.layout { display: flex; min-height: calc(100vh - 52px); }
+.wrap { flex: 1; max-width: 760px; margin: 0 auto; padding: 40px 20px 100px; }
+
+/* RIGHT SIDEBAR */
+.sidebar-right { width: 260px; flex-shrink: 0; background: var(--dark2); border-left: 1px solid var(--border); position: sticky; top: 52px; height: calc(100vh - 52px); overflow-y: auto; padding: 20px 16px; }
+.sb-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 16px; }
+
+/* EOL BANNER */
+.eol-banner { background: rgba(204,0,0,0.08); border: 1px solid rgba(204,0,0,0.2); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 11px; color: #ff8888; line-height: 1.5; }
+.eol-banner strong { color: #ff6b6b; }
+
+/* SIDEBAR STEPS */
+.sb-step { margin-bottom: 14px; }
+.sb-step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.sb-step-num { width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--dim); color: var(--muted); border: 1px solid var(--border); transition: all 0.3s; }
+.sb-step-num.active { background: var(--red); color: white; border-color: var(--red); }
+.sb-step-num.done { background: var(--green); color: var(--dark); border-color: var(--green); }
+.sb-step-label { font-size: 11px; font-weight: 600; color: var(--muted); transition: color 0.3s; }
+.sb-step-label.active { color: var(--text); }
+.sb-step-label.done { color: var(--green); }
+.sb-fields { padding-left: 26px; display: none; }
+.sb-fields.show { display: block; }
+.sb-field { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 11px; color: var(--muted); transition: color 0.2s; }
+.sb-field .chk { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 8px; flex-shrink: 0; transition: all 0.2s; }
+.sb-field .chk.ok { background: var(--green); border-color: var(--green); color: var(--dark); }
+.sb-field.done { color: var(--green); }
+.sb-divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* DEAL SUMMARY */
+.deal-summary { background: var(--dark3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 11px; color: var(--muted); line-height: 1.8; }
+.deal-summary .ds-row { display: flex; justify-content: space-between; }
+.deal-summary .ds-val { color: var(--blue); font-family: 'DM Mono', monospace; font-size: 11px; }
+.deal-summary .ds-empty { color: var(--dim); font-style: italic; }
+
+/* RESULT MINI */
+.sb-result { border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 500; margin-bottom: 5px; border: 1px solid var(--border); background: var(--dark3); color: var(--muted); }
+.sb-result.ok { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.05); color: var(--green); }
+.sb-result.ko { border-color: rgba(204,0,0,0.3); background: rgba(204,0,0,0.05); color: #ff6b6b; }
+.sb-result.warn { border-color: rgba(255,140,66,0.3); background: rgba(255,140,66,0.05); color: var(--orange); }
+
+/* HERO */
+.hero { margin-bottom: 36px; }
+.hero h1 { font-size: 28px; font-weight: 700; line-height: 1.2; margin-bottom: 6px; }
+.hero h1 span { color: var(--red); }
+.hero p { font-size: 14px; color: var(--muted); }
+
+/* STEP CARD */
+.step-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 12px; transition: all 0.3s; }
+.step-card.locked { opacity: 0.4; pointer-events: none; }
+.step-card.hidden { display: none; }
+.step-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: var(--dark3); border-bottom: 1px solid var(--border); }
+.step-head-left { display: flex; align-items: center; gap: 10px; }
+.snum { width: 22px; height: 22px; background: var(--red); color: white; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.snum.ok { background: var(--green); color: var(--dark); }
+.snum.warn { background: var(--orange); color: var(--dark); }
+.step-head h2 { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.step-status { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.step-body { padding: 18px; }
+
+/* FIELDS */
+.fg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .fg { grid-template-columns: 1fr; } }
+.f { margin-bottom: 14px; }
+.f:last-child { margin-bottom: 0; }
+.f label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+.f input, .f select, .f textarea { width: 100%; background: var(--input); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); transition: border-color 0.15s, box-shadow 0.15s; appearance: none; }
+.f input:focus, .f select:focus, .f textarea:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(204,0,0,0.1); }
+.f input::placeholder, .f textarea::placeholder { color: var(--dim); }
+.f select option { background: var(--dark2); }
+.f textarea { resize: vertical; min-height: 70px; }
+.f input.invalid { border-color: rgba(204,0,0,0.6); }
+.hint { font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+/* ABV */
+.abv-bar { background: var(--dark3); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.abv-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.abv-val { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; color: var(--blue); }
+.abv-val.empty { font-size: 13px; color: var(--dim); font-family: 'DM Sans', sans-serif; }
+
+/* ALERTS */
+.alert { border-radius: 8px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 13px; font-weight: 500; }
+.alert-icon { font-size: 16px; flex-shrink: 0; }
+.alert.stop { background: rgba(204,0,0,0.1); border: 1px solid rgba(204,0,0,0.3); color: #ff6b6b; }
+.alert.go { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+.alert.warn { background: var(--orange-bg); border: 1px solid var(--orange-border); color: var(--orange); }
+.alert.info { background: var(--dark3); border: 1px solid var(--border); color: var(--muted); }
+
+/* RESULT CARDS */
+.results { display: grid; gap: 8px; margin-top: 4px; }
+.rcard { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--dark3); transition: all 0.2s; }
+.rcard.ok { border-color: rgba(0,200,150,0.3); background: rgba(0,200,150,0.05); }
+.rcard.ko { border-color: rgba(204,0,0,0.3); background: rgba(204,0,0,0.05); }
+.rcard.warn { border-color: rgba(255,140,66,0.3); background: rgba(255,140,66,0.05); }
+.rcard .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.rlabel { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+.rval { font-size: 13px; font-weight: 500; }
+.rcard.ok .rval { color: var(--green); }
+.rcard.ko .rval { color: #ff6b6b; }
+.rcard.warn .rval { color: var(--orange); }
+
+/* AUTO FIELDS */
+.auto-val { background: rgba(74,158,255,0.08); border: 1px solid rgba(74,158,255,0.2); border-radius: 6px; padding: 9px 12px; font-size: 13px; font-weight: 500; color: var(--blue); font-family: 'DM Mono', monospace; }
+.auto-badge { font-size: 10px; font-weight: 600; background: rgba(74,158,255,0.12); color: var(--blue); border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+
+/* VERSION GRID */
+.vgrid { display: grid; gap: 8px; }
+.vrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center; }
+.vname { font-size: 13px; font-weight: 500; font-family: 'DM Mono', monospace; color: var(--text); }
+
+/* GENERATE */
+.btn-gen { width: 100%; padding: 16px; background: var(--red); color: white; border: none; border-radius: var(--r); font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.15s; box-shadow: 0 4px 20px rgba(204,0,0,0.3); letter-spacing: 0.02em; }
+.btn-gen:hover { background: var(--red-dark); transform: translateY(-1px); box-shadow: 0 6px 28px rgba(204,0,0,0.45); }
+.btn-gen:active { transform: translateY(0); }
+.btn-gen:disabled { background: var(--dark3); color: var(--dim); cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* SPINNER */
+.spin { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+.spin.show { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.div { height: 1px; background: var(--border); margin: 16px 0; }
+.eol { display: inline-flex; align-items: center; gap: 5px; background: rgba(204,0,0,0.12); border: 1px solid rgba(204,0,0,0.3); color: #ff6b6b; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.fade { animation: fadeIn 0.25s ease forwards; }
+
+/* SECTION LABEL */
+.sec-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 14px 0 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+.sec-label:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+@media (max-width: 1100px) { .sidebar-right { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tl">
+    <img class="logo-arrow" src="data:image/png;base64,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" alt="Arrow Electronics" style="height:18px;width:auto;object-fit:contain">
+    <div class="logo-sep"></div>
+    <svg width="80" height="14" viewBox="0 0 240 33" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.85">
+      <path d="M26.4 0H0v33h26.4c9.1 0 16.5-7.4 16.5-16.5S35.5 0 26.4 0z" fill="#CC092F"/>
+      <path d="M26.4 6.6c-5.5 0-9.9 4.4-9.9 9.9s4.4 9.9 9.9 9.9 9.9-4.4 9.9-9.9-4.4-9.9-9.9-9.9z" fill="white"/>
+      <text x="55" y="25" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="white" letter-spacing="0.5">BROADCOM</text>
+    </svg>
+    <span class="tl-text">— Configurateur ADP</span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-reset" onclick="resetAll()">↺ Réinitialiser</button>
+    <div class="tbadge">Arrow Electronics</div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="wrap">
+
+    <div class="hero">
+      <h1>Configurateur <span>Adoption Plan</span></h1>
+      <p>Remplissez chaque étape — le document Word se génère automatiquement à la fin.</p>
+    </div>
+
+    <!-- ÉTAPE 1 -->
+    <div class="step-card fade" id="s1">
+      <div class="step-head">
+        <div class="step-head-left">
+          <div class="snum" id="sn1">1</div>
+          <h2>Montant & Durée du deal</h2>
+        </div>
+        <span class="step-status" id="ss1"></span>
+      </div>
+      <div class="step-body">
+        <div class="fg">
+          <div class="f">
+            <label>Montant total du deal (€)</label>
+            <input type="number" id="montant" placeholder="ex: 150 000" min="0">
+          </div>
+          <div class="f">
+            <label>Durée du contrat</label>
+            <select id="duree">
+              <option value="">— Sélectionnez —</option>
+              <option value="1">1 an</option>
+              <option value="3">3 ans</option>
+              <option value="5">5 ans + Special Reason</option>
+            </select>
+          </div>
+        </div>
+        <div class="abv-bar">
+          <span class="abv-label">Montant annuel / ABV</span>
+          <span class="abv-val empty" id="abv-disp">— saisissez montant et durée</span>
+        </div>
+        <div id="msg-abv" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 2 -->
+    <div class="step-card locked" id="s2">
+      <div class="step-head">
+        <div class="step-head-left">
+          <div class="snum" id="sn2">2</div>
+          <h2>Produit & Type de deal</h2>
+        </div>
+        <span class="step-status" id="ss2"></span>
+      </div>
+      <div class="step-body">
+        <div class="fg">
+          <div class="f">
+            <label>Produit VMware</label>
+            <select id="produit">
+              <option value="">— Sélectionnez —</option>
+              <option value="VVF">VVF</option>
+              <option value="VCF">VCF</option>
+              <option value="ENT+">ENT+</option>
+              <option value="VVS">VVS</option>
+            </select>
+          </div>
+          <div class="f">
+            <label>Type de deal</label>
+            <select id="type_deal">
+              <option value="">— Sélectionnez —</option>
+              <option value="Renewal Sub2Sub">Renewal Sub2Sub</option>
+              <option value="NEW">NEW</option>
+              <option value="Capacity">Capacity</option>
+              <option value="Migration">Migration</option>
+            </select>
+          </div>
+        </div>
+        <div class="f">
+          <label>Nombre de cores</label>
+          <input type="number" id="cores" placeholder="ex: 350" min="0">
+        </div>
+        <div class="f" id="justif-wrap" style="display:none">
+          <label>Justification 5 ans <span style="color:var(--red)">★ Obligatoire</span></label>
+          <textarea id="justif" placeholder="Expliquez la raison du contrat 5 ans..."></textarea>
+        </div>
+        <div id="msg-eol" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 3 -->
+    <div class="step-card locked" id="s3">
+      <div class="step-head">
+        <div class="step-head-left">
+          <div class="snum" id="sn3">3</div>
+          <h2>Résultats — Décision automatique</h2>
+        </div>
+        <span class="step-status" id="ss3"></span>
+      </div>
+      <div class="step-body">
+        <div class="results">
+          <div class="rcard" id="rc0"><div class="icon">📋</div><div><div class="rlabel">Statut DR</div><div class="rval" id="rv0">—</div></div></div>
+          <div class="rcard" id="rc1"><div class="icon">📝</div><div><div class="rlabel">Plan d'adoption requis</div><div class="rval" id="rv1">—</div></div></div>
+          <div class="rcard" id="rc2"><div class="icon">🔐</div><div><div class="rlabel">Approbation Broadcom AD</div><div class="rval" id="rv2">—</div></div></div>
+          <div class="rcard" id="rc3"><div class="icon">✅</div><div><div class="rlabel">Statut CPQ</div><div class="rval" id="rv3">—</div></div></div>
+        </div>
+        <div id="msg-res" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 4 -->
+    <div class="step-card locked hidden" id="s4">
+      <div class="step-head">
+        <div class="step-head-left">
+          <div class="snum" id="sn4">4</div>
+          <h2>Informations du compte client</h2>
+        </div>
+        <span class="step-status" id="ss4"></span>
+      </div>
+      <div class="step-body">
+        <div class="fg" style="margin-bottom:14px">
+          <div class="f"><label>Produit <span class="auto-badge">AUTO</span></label><div class="auto-val" id="a-prod">—</div></div>
+          <div class="f"><label>Durée <span class="auto-badge">AUTO</span></label><div class="auto-val" id="a-dur">—</div></div>
+          <div class="f"><label>Type de deal <span class="auto-badge">AUTO</span></label><div class="auto-val" id="a-type">—</div></div>
+          <div class="f"><label>Cores <span class="auto-badge">AUTO</span></label><div class="auto-val" id="a-cores">—</div></div>
+          <div class="f"><label>ABV annuel <span class="auto-badge">AUTO</span></label><div class="auto-val" id="a-abv">—</div></div>
+          <div class="f"><label>Approbation AD <span class="auto-badge">AUTO</span></label><div class="auto-val" id="a-ad">—</div></div>
+        </div>
+        <div class="div"></div>
+        <div class="fg">
+          <div class="f"><label>Nom du compte client <span style="color:var(--red)">*</span></label><input type="text" id="acc" placeholder="ex: Air Liquide"></div>
+          <div class="f"><label>ERP Number</label><input type="text" id="erp" placeholder="ex: ERP-123456"></div>
+          <div class="f"><label>Contact client (Nom + Email)</label><input type="text" id="cc" placeholder="Jean Dupont / jean@client.com"></div>
+          <div class="f"><label>Nom du partenaire</label><input type="text" id="pn" placeholder="ex: Arrow Electronics"></div>
+          <div class="f"><label>Contact partenaire</label><input type="text" id="cp" placeholder="Max / max@arrow.com"></div>
+          <div class="f"><label>Contact escalade</label><input type="text" id="esc" placeholder="Sophie / sophie@arrow.com"></div>
+          <div class="f"><label>Broadcom Contact 1</label><input type="text" id="bc1" placeholder="Nom + Email"></div>
+          <div class="f"><label>Broadcom Contact 2</label><input type="text" id="bc2" placeholder="Optionnel"></div>
+          <div class="f"><label>Broadcom Contact 3</label><input type="text" id="bc3" placeholder="Optionnel"></div>
+        </div>
+        <div class="f"><label>Licences actuelles</label><input type="text" id="lic" placeholder="ex: VVF — 832 cores"></div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 5 -->
+    <div class="step-card locked hidden" id="s5">
+      <div class="step-head">
+        <div class="step-head-left">
+          <div class="snum" id="sn5">5</div>
+          <h2>Infrastructure & Narratif ADP</h2>
+        </div>
+        <span class="step-status" id="ss5"></span>
+      </div>
+      <div class="step-body">
+        <div class="sec-label">Versions logicielles</div>
+        <div class="vgrid">
+          <div class="vrow"><div class="vname">vSphere</div><div class="f" style="margin:0"><select id="vs"><option value="">—</option><option>v6</option><option>v7</option><option>v8</option><option>v8.0.3</option><option>v9</option><option>Not deployed</option></select></div></div>
+          <div class="vrow"><div class="vname">vSAN</div><div class="f" style="margin:0"><select id="vsan"><option value="">—</option><option>Not deployed</option><option>v7</option><option>v8</option><option>Enterprise</option></select></div></div>
+          <div class="vrow"><div class="vname">NSX</div><div class="f" style="margin:0"><select id="nsx"><option value="">—</option><option>Not deployed</option><option>v3</option><option>v4</option><option>v4.2</option></select></div></div>
+          <div class="vrow"><div class="vname">VCF Operations</div><div class="f" style="margin:0"><select id="vcfo"><option value="">—</option><option>Not deployed</option><option>v8</option><option>v8.18</option></select></div></div>
+          <div class="vrow"><div class="vname">VCF Automation</div><div class="f" style="margin:0"><select id="vcfa"><option value="">—</option><option>Not deployed</option><option>v8</option><option>v9</option></select></div></div>
+          <div class="vrow"><div class="vname">Container Runtime</div><div class="f" style="margin:0"><select id="crt"><option value="">—</option><option>Not deployed</option><option>VKS</option><option>RHOS</option><option>Tanzu</option></select></div></div>
+          <div class="vrow"><div class="vname">vDefend / ATP</div><div class="f" style="margin:0"><select id="vdf"><option value="">—</option><option>Not deployed</option><option>v4</option><option>v4.2 with ATP</option></select></div></div>
+        </div>
+        <div class="sec-label">Checkpoints — suivi Broadcom AD</div>
+        <div class="vgrid">
+          <div class="vrow"><div class="vname">Phase 1</div><div class="f" style="margin:0"><select id="cp1"><option>Not started</option><option>In progress</option><option>Completed</option></select></div></div>
+          <div class="vrow"><div class="vname">Phase 2</div><div class="f" style="margin:0"><select id="cp2"><option>Not started</option><option>In progress</option><option>Completed</option></select></div></div>
+          <div class="vrow"><div class="vname">Phase 3</div><div class="f" style="margin:0"><select id="cp3"><option>Not started</option><option>In progress</option><option>Completed</option></select></div></div>
+        </div>
+        <div class="sec-label">Sections narratives</div>
+        <div class="f"><label>Current State Architecture</label><textarea id="txt-csa" placeholder="Infrastructure actuelle : sites, serveurs, architecture, plans futurs, roadblocks..."></textarea></div>
+        <div class="f"><label>Competitive / Ecosystem Landscape</label><textarea id="txt-comp" placeholder="Technologies tierces utilisées là où le client ne compte pas utiliser VVF/VCF..."></textarea></div>
+        <div class="f"><label>Adoption Initiative</label><textarea id="txt-init" placeholder="Initiatives VVF/VCF dans le compte, objectifs stratégiques..."></textarea></div>
+        <div class="f"><label>Collateral disponible</label><textarea id="txt-coll" placeholder="HLD, LLD, architectures, présentations..."></textarea></div>
+        <div class="f"><label>Activities & Timeline</label><textarea id="txt-time" placeholder="Phase 1 : X jours, X mois&#10;Phase 2 : X jours, X mois&#10;Phase 3 : X jours, X mois"></textarea></div>
+        <div class="f"><label>Commitment — Ressources engagées</label><textarea id="txt-comm" placeholder="1 PM, 3 engineers, 1 architect..."></textarea></div>
+        <div class="f"><label>Comments / Remarks (optionnel)</label><textarea id="txt-rem" placeholder="Commentaires additionnels..."></textarea></div>
+      </div>
+    </div>
+
+    <!-- ÉTAPE 6 -->
+    <div class="step-card locked hidden" id="s6">
+      <div class="step-head">
+        <div class="step-head-left">
+          <div class="snum" id="sn6">6</div>
+          <h2>Générer l'Adoption Plan</h2>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="alert go">
+          <span class="alert-icon">✅</span>
+          <span>Toutes les informations sont remplies. Cliquez sur "Générer" pour télécharger le document Word prêt à envoyer à Broadcom.</span>
+        </div>
+        <div id="ad-warning" style="display:none" class="alert warn">
+          <span class="alert-icon">⚠️</span>
+          <span>ABV > 100 000 € — L'approbation Broadcom AD est requise. Le document sera généré avec cette mention.</span>
+        </div>
+        <button class="btn-gen" id="btn-gen" onclick="generateDoc()">
+          <span id="btn-txt">⚡ Générer le document Word (.docx)</span>
+          <div class="spin" id="spin"></div>
+        </button>
+        <p class="hint" style="text-align:center;margin-top:10px">Le fichier Word se télécharge directement — ouvrez-le dans Word et exportez en PDF pour envoyer à Broadcom.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR DROITE -->
+  <div class="sidebar-right">
+    <div class="sb-title">Suivi de progression</div>
+
+    <div class="eol-banner">
+      <strong>⚠ Fin de vie :</strong> ENT+ et VVS ne sont plus disponibles à partir du <strong>11 octobre 2027</strong>. Anticipez la migration vers VVF ou VCF.
+    </div>
+
+    <!-- ÉTAPE 1 -->
+    <div class="sb-step" id="sb-s1">
+      <div class="sb-step-header">
+        <div class="sb-step-num active" id="sb-n1">1</div>
+        <span class="sb-step-label active" id="sb-l1">Montant & Durée</span>
+      </div>
+      <div class="sb-fields show" id="sb-f1">
+        <div class="sb-field" id="sbf-montant">
+          <div class="chk" id="chk-montant"></div>
+          <span>Montant total</span>
+        </div>
+        <div class="sb-field" id="sbf-duree">
+          <div class="chk" id="chk-duree"></div>
+          <span>Durée du contrat</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- ÉTAPE 2 -->
+    <div class="sb-step" id="sb-s2">
+      <div class="sb-step-header">
+        <div class="sb-step-num" id="sb-n2">2</div>
+        <span class="sb-step-label" id="sb-l2">Produit & Deal</span>
+      </div>
+      <div class="sb-fields" id="sb-f2">
+        <div class="sb-field" id="sbf-prod">
+          <div class="chk" id="chk-prod"></div>
+          <span>Produit VMware</span>
+        </div>
+        <div class="sb-field" id="sbf-type">
+          <div class="chk" id="chk-type"></div>
+          <span>Type de deal</span>
+        </div>
+        <div class="sb-field" id="sbf-cores">
+          <div class="chk" id="chk-cores"></div>
+          <span>Nombre de cores</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- ÉTAPE 3 -->
+    <div class="sb-step" id="sb-s3">
+      <div class="sb-step-header">
+        <div class="sb-step-num" id="sb-n3">3</div>
+        <span class="sb-step-label" id="sb-l3">Résultats</span>
+      </div>
+      <div class="sb-fields" id="sb-f3">
+        <div class="sb-result" id="sbr0">Statut DR : —</div>
+        <div class="sb-result" id="sbr1">Plan adoption : —</div>
+        <div class="sb-result" id="sbr2">Approbation AD : —</div>
+        <div class="sb-result" id="sbr3">CPQ : —</div>
+      </div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- RÉSUMÉ DEAL -->
+    <div class="sb-title" style="margin-top:4px">Résumé du deal</div>
+    <div class="deal-summary">
+      <div class="ds-row"><span>Produit</span><span class="ds-val" id="ds-prod">—</span></div>
+      <div class="ds-row"><span>Durée</span><span class="ds-val" id="ds-dur">—</span></div>
+      <div class="ds-row"><span>Type</span><span class="ds-val" id="ds-type">—</span></div>
+      <div class="ds-row"><span>Cores</span><span class="ds-val" id="ds-cores">—</span></div>
+      <div class="ds-row"><span>ABV / an</span><span class="ds-val" id="ds-abv">—</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
